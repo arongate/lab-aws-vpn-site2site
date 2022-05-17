@@ -32,7 +32,7 @@ resource "aws_security_group" "aws-dc" {
   }
 
   egress {
-      description      = "Authorize Internet access"
+    description      = "Authorize Internet access"
     from_port        = 0
     to_port          = 0
     protocol         = "-1"
@@ -77,27 +77,29 @@ resource "aws_vpn_gateway" "on-premise-dc" {
   }
 }
 
-resource "aws_vpn_gateway_route_propagation" "aws-dc" {
-  vpn_gateway_id = aws_vpn_gateway.on-premise-dc.id
-  route_table_id = aws_vpc.aws-dc.main_route_table_id
-}
-
 resource "aws_vpn_connection" "on-premise-dc" {
   vpn_gateway_id      = aws_vpn_gateway.on-premise-dc.id
   customer_gateway_id = aws_customer_gateway.on-premise-dc.id
   type                = "ipsec.1"
   static_routes_only  = true
+
+  local_ipv4_network_cidr  = aws_vpc.on-premise-dc.cidr_block
+  remote_ipv4_network_cidr = aws_vpc.aws-dc.cidr_block
   tags = {
     Name = "on-premise-dc-vpn-connection"
     Env  = "lab"
   }
 }
-
-
 resource "aws_vpn_connection_route" "on-premise-dc" {
   destination_cidr_block = aws_vpc.on-premise-dc.cidr_block
   vpn_connection_id      = aws_vpn_connection.on-premise-dc.id
 }
+
+resource "aws_vpn_gateway_route_propagation" "aws-dc" {
+  vpn_gateway_id = aws_vpn_gateway.on-premise-dc.id
+  route_table_id = aws_vpc.aws-dc.main_route_table_id
+}
+
 
 resource "aws_instance" "test-instance" {
   ami                         = data.aws_ami.ubuntu.id

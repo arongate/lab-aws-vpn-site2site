@@ -30,7 +30,7 @@ resource "aws_security_group" "on-premise-dc" {
   }
 
   egress {
-      description      = "Authorize Internet access"
+    description      = "Authorize Internet access"
     from_port        = 0
     to_port          = 0
     protocol         = "-1"
@@ -64,25 +64,6 @@ resource "aws_internet_gateway" "on-premise-dc" {
   }
 }
 
-resource "aws_default_route_table" "on-premise-dc" {
-  default_route_table_id = aws_vpc.on-premise-dc.default_route_table_id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.on-premise-dc.id
-  }
-
-  route {
-    ipv6_cidr_block        = "::/0"
-    gateway_id = aws_internet_gateway.on-premise-dc.id
-  }
-
-  tags = {
-    Name = "on-premise-dc-rtb"
-    Env  = "lab"
-  }
-}
-
 # we get ubuntu ami
 data "aws_ami" "ubuntu" {
   most_recent = true
@@ -108,6 +89,7 @@ resource "aws_instance" "open-swan" {
   security_groups             = [aws_security_group.on-premise-dc.id]
   source_dest_check           = false
   subnet_id                   = aws_subnet.on-prem-public-subnet.id
+  key_name                    = "default"
 
   tags = {
     Name = "open-swan"
@@ -118,22 +100,17 @@ resource "aws_instance" "open-swan" {
 output "public-ip" {
   value = aws_instance.open-swan.public_ip
 }
-  
 
 resource "aws_default_route_table" "on-premise-dc" {
   default_route_table_id = aws_vpc.on-premise-dc.default_route_table_id
 
   route {
-    cidr_block = aws_vpc.aws-dc.cidr_block
-    instance_id = aws_internet_gateway.example.id
-  }
-
-  route {
-    ipv6_cidr_block        = "::/0"
-    egress_only_gateway_id = aws_egress_only_internet_gateway.example.id
+    cidr_block  = aws_vpc.aws-dc.cidr_block
+    instance_id = aws_instance.open-swan.id
   }
 
   tags = {
-    Name = "example"
+    Name = "on-premise-dc-to-aws-dc"
+    Env  = "lab"
   }
 }
