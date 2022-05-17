@@ -1,7 +1,7 @@
 1 Account
 2 VPC
 
-VPC AWS (10.0.0.1/16)
+VPC AWS (10.0.0.0/16)
 1 AZ
 1 Private Subnet
     1 Route Table
