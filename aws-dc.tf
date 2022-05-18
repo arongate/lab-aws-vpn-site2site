@@ -28,7 +28,7 @@ resource "aws_security_group" "aws-dc" {
     to_port          = -1
     protocol         = "icmp"
     cidr_blocks      = [aws_vpc.on-premise-dc.cidr_block]
-    ipv6_cidr_blocks = [aws_vpc.on-premise-dc.ipv6_cidr_block]
+    # ipv6_cidr_blocks = [aws_vpc.on-premise-dc.ipv6_cidr_block]
   }
 
   egress {
@@ -41,19 +41,19 @@ resource "aws_security_group" "aws-dc" {
   }
 
   tags = {
-    Name = "On-premise-dc"
+    Name = "aws-dc"
     Env  = "lab"
   }
 }
 
 
-resource "aws_subnet" "aws-private-subnet" {
+resource "aws_subnet" "aws-dc-private" {
   vpc_id            = aws_vpc.aws-dc.id
   cidr_block        = "10.0.0.0/24"
   availability_zone = "eu-west-3a"
 
   tags = {
-    Name = "aws-private-subnet"
+    Name = "aws-dc-private"
     Env  = "lab"
   }
 }
@@ -101,22 +101,22 @@ resource "aws_vpn_gateway_route_propagation" "aws-dc" {
 }
 
 
-resource "aws_instance" "test-instance" {
+resource "aws_instance" "aws-dc-instance" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = "t2.micro"
   associate_public_ip_address = true
-  availability_zone           = "eu-west-3a"
   security_groups             = [aws_security_group.aws-dc.id]
   source_dest_check           = false
-  subnet_id                   = aws_subnet.aws-private-subnet.id
+  subnet_id                   = aws_subnet.aws-dc-private.id
+  # availability_zone           = "eu-west-3a"
 
   tags = {
-    Name = "test-instance"
+    Name = "aws-dc-instance"
     Env  = "lab"
   }
 }
 
-output "test-instance-ip" {
-  value = aws_instance.test-instance.private_ip
+output "aws-dc-instance-ip" {
+  value = aws_instance.aws-dc-instance.private_ip
 }
 

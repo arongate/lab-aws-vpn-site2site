@@ -21,12 +21,12 @@ resource "aws_security_group" "on-premise-dc" {
     ipv6_cidr_blocks = ["::/0"]
   }
   ingress {
-    description      = "Allow ICMP from within VPC"
-    from_port        = -1
-    to_port          = -1
-    protocol         = "icmp"
-    cidr_blocks      = [aws_vpc.on-premise-dc.cidr_block]
-    ipv6_cidr_blocks = [aws_vpc.on-premise-dc.ipv6_cidr_block]
+    description = "Allow ICMP from within VPC"
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = [aws_vpc.on-premise-dc.cidr_block]
+    # ipv6_cidr_blocks = [aws_vpc.on-premise-dc.ipv6_cidr_block]
   }
 
   egress {
@@ -44,13 +44,13 @@ resource "aws_security_group" "on-premise-dc" {
   }
 }
 
-resource "aws_subnet" "on-prem-public-subnet" {
-  vpc_id            = aws_vpc.on-premise-dc.id
-  cidr_block        = "172.21.0.0/24"
-  availability_zone = "eu-west-3a"
+resource "aws_subnet" "on-premise-dc-public" {
+  vpc_id     = aws_vpc.on-premise-dc.id
+  cidr_block = "172.21.0.0/24"
+  # availability_zone = "eu-west-3a"
 
   tags = {
-    Name = "on-prem-public-subnet"
+    Name = "on-premise-dc-public"
     Env  = "lab"
   }
 }
@@ -85,11 +85,12 @@ resource "aws_instance" "open-swan" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = "t2.micro"
   associate_public_ip_address = true
-  availability_zone           = "eu-west-3a"
   security_groups             = [aws_security_group.on-premise-dc.id]
   source_dest_check           = false
-  subnet_id                   = aws_subnet.on-prem-public-subnet.id
+  subnet_id                   = aws_subnet.on-premise-dc-public.id
   key_name                    = "default"
+  user_data                   = file("${path.module}/userdata.sh")
+  # availability_zone           = "eu-west-3a"
 
   tags = {
     Name = "open-swan"
@@ -97,7 +98,7 @@ resource "aws_instance" "open-swan" {
   }
 }
 
-output "public-ip" {
+output "open-swan-public-ip" {
   value = aws_instance.open-swan.public_ip
 }
 
