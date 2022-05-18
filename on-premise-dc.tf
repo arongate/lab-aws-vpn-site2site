@@ -107,6 +107,10 @@ resource "aws_default_route_table" "on-premise-dc" {
     cidr_block  = aws_vpc.aws-dc.cidr_block
     instance_id = aws_instance.open-swan.id
   }
+  route {
+    cidr_block  = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.on-premise-dc.id
+  }
 
   tags = {
     Name = "on-premise-dc-to-aws-dc"
