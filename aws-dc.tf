@@ -102,7 +102,7 @@ resource "aws_vpn_gateway_route_propagation" "aws-dc" {
 
 
 resource "aws_instance" "aws-dc-instance" {
-  ami                         = data.aws_ami.ubuntu.id
+  ami                         = data.aws_ami.amazon-linux-2.id
   instance_type               = "t2.micro"
   associate_public_ip_address = true
   security_groups             = [aws_security_group.aws-dc.id]

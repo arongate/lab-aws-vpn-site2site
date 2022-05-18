@@ -64,25 +64,23 @@ resource "aws_internet_gateway" "on-premise-dc" {
   }
 }
 
-# we get ubuntu ami
-data "aws_ami" "ubuntu" {
+# we get ami
+data "aws_ami" "amazon-linux-2" {
   most_recent = true
 
   filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+    name   = "owner-alias"
+    values = ["amazon"]
   }
-
   filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
+    name   = "name"
+    values = ["amzn2-ami-hvm*"]
   }
-
-  owners = ["099720109477"] # Canonical
+  owners = [ "amazon" ]
 }
 
 resource "aws_instance" "open-swan" {
-  ami                         = data.aws_ami.ubuntu.id
+  ami                         = data.aws_ami.amazon-linux-2.id
   instance_type               = "t2.micro"
   associate_public_ip_address = true
   security_groups             = [aws_security_group.on-premise-dc.id]
