@@ -2,7 +2,7 @@ plan:
 	terraform plan
 
 cost: install_infracost
-	infracost breakdown --path . --terraform-parse-hcl --show-skipped
+	infracost breakdown --path . --show-skipped
 
 apply:
 	terraform apply -auto-approve
